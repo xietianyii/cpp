@@ -1,0 +1,3 @@
+A. 0 0
+B. first=last a b 一次异或后为 0 0 后续都为0
+C. 终止条件改为first<last

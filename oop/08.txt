@@ -1,0 +1,12 @@
+new 先分配memory 再调用ctor
+complex* pc=new complex(1,2);
+编译器转化为三个步骤
+1. void* mem=operator new (sizeof(complex));//malloc 申请一块空间
+2. pc=stack_cast<complex*>(mem) //类型转换为 complex*
+3. pc->complex::complex(1,2); // 调用complex的构造函数
+
+delete 先调用dtor 再释放memory
+delete pc
+编译器转化为两个步骤
+1. pc->complex::~complex()//析构函数
+2. operator delete pc //调用free()  
