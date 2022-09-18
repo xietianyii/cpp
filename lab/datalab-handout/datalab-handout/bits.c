@@ -251,17 +251,18 @@ int logicalNeg(int x) {
  *  Rating: 4
  */
 int howManyBits(int x) {
+  int xx,a,b,c,d,e;
 x=x^(~(x>>31&1)+1);
-int xx=!x;
-int a=16&(~(!!(x>>16))+1);
+xx=!x;
+a=16&(~(!!(x>>16))+1);
 x=x>>a;
-int b=8&(~(!!(x>>8))+1);
+b=8&(~(!!(x>>8))+1);
 x=x>>b;
-int c=4&(~(!!(x>>4))+1);
+c=4&(~(!!(x>>4))+1);
 x=x>>c;
-int d=2&(~(!!(x>>2))+1);
+d=2&(~(!!(x>>2))+1);
 x=x>>d;
-int e=1&(~(!!(x>>1))+1);
+e=1&(~(!!(x>>1))+1);
 x=x>>e;
 return a+b+c+d+e+2+(~xx+1);
 }
@@ -278,7 +279,14 @@ return a+b+c+d+e+2+(~xx+1);
  *   Rating: 4
  */
 unsigned floatScale2(unsigned uf) {
-  return 2;
+    unsigned sign=(uf>>31)&(0x1);
+    unsigned e=(uf>>23)&(0xff);
+    unsigned f=uf&(0x7fffff);
+    if(e==255)return uf;
+    if(e==0)
+      return (sign<<31)|(f<<1);
+    e++;
+    return (sign<<31)|(e<<23)|f;
 }
 /* 
  * floatFloat2Int - Return bit-level equivalent of expression (int) f
@@ -293,7 +301,26 @@ unsigned floatScale2(unsigned uf) {
  *   Rating: 4
  */
 int floatFloat2Int(unsigned uf) {
-  return 2;
+   unsigned sign=(uf>>31)&(0x1);
+    unsigned e=(uf>>23)&(0xff);
+    if(e==255)return 1<<31;
+    if(e==0)return 0;
+    if(e<150)
+    {
+      int num=(1<<23)|(uf&(0x7fffff));
+      int x=150-e;
+      if(x>31)x=31;
+      if(sign==0)return (num>>x);
+        else return ~(num>>x)+1;
+    }
+    else{
+      int num=(1<<23)|(uf&(0x7fffff));
+      if(e<=157){
+        if(sign==0)return (num<<(e-150));
+        else return ~(num<<(e-150))+1;
+      }
+      return 1<<31;
+    }
 }
 /* 
  * floatPower2 - Return bit-level equivalent of the expression 2.0^x
@@ -309,5 +336,9 @@ int floatFloat2Int(unsigned uf) {
  *   Rating: 4
  */
 unsigned floatPower2(int x) {
-    return 2;
+    int e=0x7f;
+    int sum=e+x;
+    if(sum>=0xff)return 0x7f800000;
+    if(sum<=0)return 0;
+    return sum<<23;
 }
